@@ -63,7 +63,7 @@ const content = {
     form: { name: "الاسم", namePlaceholder: "كيف نناديك؟", phone: "رقم التواصل", phonePlaceholder: "05X XXX XXXX", request: "ما الذي تبحث عنه؟", requestPlaceholder: "منتج، كمية تقريبية، أو مسار شحن تفكر فيه...", submit: "أرسل التفاصيل", privacy: "نستخدم بياناتك فقط للتواصل حول طلبك." },
     footerTag: "نرتب الطريق. أنت تبني تجارتك.",
     email: "البريد الإلكتروني",
-    phone: "+966 50 000 0000",
+    phone: "+966 54 374 9292",
     footerCopy: "© 2026 الرائدة الفضية. جميع الحقوق محفوظة.",
     success: "تم استلام طلبك مبدئيًا",
     successDescription: "سيتواصل معك فريق الرائدة الفضية لترتيب التفاصيل.",
@@ -112,7 +112,7 @@ const content = {
     form: { name: "Name", namePlaceholder: "What should we call you?", phone: "Contact number", phonePlaceholder: "+966 5X XXX XXXX", request: "What are you looking for?", requestPlaceholder: "Product, estimated quantity, or shipping route...", submit: "Send details", privacy: "We use your details only to respond to your request." },
     footerTag: "We arrange the route. You build the business.",
     email: "Email us",
-    phone: "+966 50 000 0000",
+    phone: "+966 54 374 9292",
     footerCopy: "© 2026 Silver Pioneer. All rights reserved.",
     success: "Your request has been received",
     successDescription: "The Silver Pioneer team will contact you to arrange the details.",
@@ -181,7 +181,20 @@ export default function Home() {
   }, [language]);
 
   const toggleLanguage = () => { setLanguage((current) => current === "ar" ? "en" : "ar"); setMenuOpen(false); };
-  const submitQuote = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); toast.success(t.success, { description: t.successDescription }); event.currentTarget.reset(); };
+  const submitQuote = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    const request = String(formData.get("request") || "").trim();
+    const message = language === "ar"
+      ? `مرحبًا فريق الرائدة الفضية، أرغب في الاستفسار عن خدماتكم.\nالاسم: ${name}\nرقم التواصل: ${phone}\nتفاصيل الطلب: ${request}`
+      : `Hello Silver Pioneer team, I would like to enquire about your services.\nName: ${name}\nContact number: ${phone}\nRequest details: ${request}`;
+    const whatsappUrl = `https://wa.me/966543749292?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    toast.success(t.success, { description: t.successDescription });
+    event.currentTarget.reset();
+  };
   const closeMenu = () => setMenuOpen(false);
   const arrow = language === "ar" ? <ArrowUpLeft size={17} /> : <ArrowUpLeft size={17} />;
 
@@ -203,7 +216,7 @@ export default function Home() {
         <section id="contact" className="relative overflow-hidden bg-[var(--ink-navy)] py-20 sm:py-28"><div className="absolute -bottom-40 -left-20 h-[420px] w-[420px] rounded-full border border-white/10" /><div className="absolute -bottom-16 left-28 h-[260px] w-[260px] rounded-full border border-white/10" /><div className="container relative"><div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-24"><div className="text-white"><p className="section-kicker">{t.contactKicker}</p><h2 className="font-display mt-5 text-3xl font-bold leading-[1.5] tracking-[-0.07em] sm:text-5xl">{t.contactTitle}</h2><p className="mt-5 max-w-md text-base leading-8 text-white/70">{t.contactDescription}</p><div className="mt-9 flex items-center gap-3 border-t border-white/15 pt-5 text-sm text-white/70"><Sparkles size={17} className="motion-right text-[var(--copper-signal)]" data-depth="14" /> {t.contactNote}</div></div><form onSubmit={submitQuote} className="bg-[var(--paper-ivory)] p-6 shadow-[12px_12px_0_rgba(216,117,75,0.22)] sm:p-8"><div className="grid gap-5 sm:grid-cols-2"><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.name}</span><input required name="name" type="text" placeholder={t.form.namePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.phone}</span><input required name="phone" type="tel" placeholder={t.form.phonePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-left text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" dir="ltr" /></label><label className="block sm:col-span-2"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.request}</span><textarea required name="request" rows={3} placeholder={t.form.requestPlaceholder} className="w-full resize-none border-b border-[var(--line)] bg-transparent px-0 py-2 text-sm leading-7 text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label></div><button type="submit" className="signal-button mt-7 inline-flex w-full items-center justify-center gap-3 bg-[var(--ink-navy)] px-6 py-4 text-sm font-bold text-white hover:bg-[#183a59]">{t.form.submit} <ArrowUpLeft size={17} /></button><p className="mt-4 text-center text-[0.68rem] leading-6 text-[var(--muted-foreground)]">{t.form.privacy}</p></form></div></div></section>
       </main>
 
-      <footer className="bg-[var(--ink-navy)] py-12 text-[var(--paper-ivory)]"><div className="container"><div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-10 lg:flex-row lg:items-end"><div><Logo language={language} light /><p className="mt-5 max-w-xs text-sm leading-7 text-white/55">{t.footerTag}</p></div><div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-white/65 sm:grid-cols-3 sm:gap-x-16"><a className="transition-colors hover:text-[var(--copper-signal)]" href="#services">{t.nav.services}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#route">{t.nav.route}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#contact">{t.quote}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="mailto:hello@silverpioneer.co">{t.email}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="tel:+966500000000" dir="ltr">{t.phone}</a></div></div><div className="flex flex-col justify-between gap-3 pt-6 text-[0.62rem] text-white/40 sm:flex-row sm:items-center"><span>{t.footerCopy}</span><span className="font-mono tracking-[0.12em]">SILVER PIONEER LOGISTICS / CN → GCC</span></div></div></footer>
+      <footer className="bg-[var(--ink-navy)] py-12 text-[var(--paper-ivory)]"><div className="container"><div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-10 lg:flex-row lg:items-end"><div><Logo language={language} light /><p className="mt-5 max-w-xs text-sm leading-7 text-white/55">{t.footerTag}</p></div><div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-white/65 sm:grid-cols-3 sm:gap-x-16"><a className="transition-colors hover:text-[var(--copper-signal)]" href="#services">{t.nav.services}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#route">{t.nav.route}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#contact">{t.quote}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="mailto:hello@silverpioneer.co">{t.email}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="tel:+966543749292" dir="ltr">{t.phone}</a></div></div><div className="flex flex-col justify-between gap-3 pt-6 text-[0.62rem] text-white/40 sm:flex-row sm:items-center"><span>{t.footerCopy}</span><span className="font-mono tracking-[0.12em]">SILVER PIONEER LOGISTICS / CN → GCC</span></div></div></footer>
     </div>
   );
 }
