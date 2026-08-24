@@ -1,2 +1,0 @@
-# ismailovich
-my work

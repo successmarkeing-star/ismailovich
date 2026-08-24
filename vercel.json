@@ -1,9 +1,9 @@
 {
   "framework": "vite",
-  "buildCommand": "pnpm build",
+  "buildCommand": "pnpm exec vite build",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/((?!api/|manus-storage/|assets/).*)", "destination": "/index.html" },
-    { "source": "/manus-storage/(.*)", "destination": "/api/manus-storage/$1" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+

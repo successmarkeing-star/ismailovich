@@ -1,7 +1,0 @@
-import { Skeleton } from "@/components/ui/skeleton";
-
-const skeletonClass = "!bg-[rgba(16,42,67,0.08)]";
-
-export function DashboardLayoutSkeleton() {
-  return <div className="flex min-h-screen bg-[var(--paper-ivory)]"><div className="hidden w-[280px] border-r border-[var(--line)] bg-[var(--paper-ivory)] p-4 md:block"><div className="flex items-center gap-3 px-2"><Skeleton className={`h-8 w-8 rounded-md ${skeletonClass}`} /><Skeleton className={`h-4 w-24 ${skeletonClass}`} /></div><div className="mt-8 space-y-2 px-2"><Skeleton className={`h-10 w-full rounded-lg ${skeletonClass}`} /><Skeleton className={`h-10 w-full rounded-lg ${skeletonClass}`} /><Skeleton className={`h-10 w-full rounded-lg ${skeletonClass}`} /></div><div className="absolute bottom-4 left-4 right-4"><div className="flex items-center gap-3 px-1"><Skeleton className={`h-9 w-9 rounded-full ${skeletonClass}`} /><div className="flex-1 space-y-2"><Skeleton className={`h-3 w-20 ${skeletonClass}`} /><Skeleton className={`h-2 w-32 ${skeletonClass}`} /></div></div></div></div><div className="flex-1 space-y-5 p-5 sm:p-8"><Skeleton className={`h-10 w-56 rounded-md ${skeletonClass}`} /><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Skeleton className={`h-32 rounded-md ${skeletonClass}`} /><Skeleton className={`h-32 rounded-md ${skeletonClass}`} /><Skeleton className={`h-32 rounded-md ${skeletonClass}`} /><Skeleton className={`h-32 rounded-md ${skeletonClass}`} /></div><Skeleton className={`h-64 rounded-md ${skeletonClass}`} /></div></div>;
-}
