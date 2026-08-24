@@ -3,6 +3,7 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|manus-storage/|assets/).*)", "destination": "/index.html" },
+    { "source": "/manus-storage/(.*)", "destination": "/api/manus-storage/$1" }
   ]
 }
