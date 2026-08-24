@@ -17,13 +17,12 @@ import {
 
 type Language = "ar" | "en";
 
-const storageOrigin = "https://3000-irax4jvc39uukegwwd632-be245866.sg1.manus.computer";
 const asset = {
-  hero: `${storageOrigin}/manus-storage/atlas-hero_6921656b.jpg`,
-  sourcing: `${storageOrigin}/manus-storage/atlas-sourcing_b189a9f1.jpg`,
-  shipping: `${storageOrigin}/manus-storage/atlas-shipping_83bf4c05.jpg`,
-  delivery: `${storageOrigin}/manus-storage/atlas-delivery_b3c47a88.jpg`,
-  mark: `${storageOrigin}/manus-storage/silver-pioneer-mark_bcc77034.png`,
+  hero: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663232981300/kmcQAGjHnZydddcy.jpg",
+  sourcing: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663232981300/gCeXHAJDZDYCpumY.jpg",
+  shipping: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663232981300/SBsWXalTPwfLVaBl.jpg",
+  delivery: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663232981300/hDRLKDEnioYcOahG.jpg",
+  mark: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663232981300/BFCeELLRyxUBYfvF.png",
 };
 
 const content = {
