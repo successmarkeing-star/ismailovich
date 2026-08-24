@@ -1,10 +1,13 @@
 // Design system: Atlas Corridors — bilingual Arabic/English logistics interface with directional motion, route markers, paper texture, and copper signal accents.
 import { useEffect, useState, type FormEvent } from "react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import {
   ArrowDownLeft,
   ArrowUpLeft,
   Check,
+  CheckCircle2,
+  Loader2,
   ChevronLeft,
   FileCheck2,
   Menu,
@@ -60,7 +63,7 @@ const content = {
     contactTitle: <>لديك منتج في بالك؟<br />خلّنا نرسم طريقه.</>,
     contactDescription: "شاركنا التفاصيل الأولية وسنعود إليك بخطوة واضحة تالية، من دون تعقيد أو التزام مسبق.",
     contactNote: "استشارة أولية حول مسار الاستيراد",
-    form: { name: "الاسم", namePlaceholder: "كيف نناديك؟", phone: "رقم التواصل", phonePlaceholder: "05X XXX XXXX", request: "ما الذي تبحث عنه؟", requestPlaceholder: "منتج، كمية تقريبية، أو مسار شحن تفكر فيه...", submit: "أرسل التفاصيل", privacy: "نستخدم بياناتك فقط للتواصل حول طلبك." },
+    form: { name: "الاسم", namePlaceholder: "كيف نناديك؟", phone: "رقم التواصل", phonePlaceholder: "05X XXX XXXX", request: "ما الذي تبحث عنه؟", requestPlaceholder: "منتج، كمية تقريبية، أو مسار شحن تفكر فيه...", submit: "أرسل التفاصيل", sending: "جارٍ تجهيز واتساب...", sent: "تم تجهيز رسالتك، سيتم فتح واتساب الآن", privacy: "نستخدم بياناتك فقط للتواصل حول طلبك." },
     footerTag: "نرتب الطريق. أنت تبني تجارتك.",
     email: "البريد الإلكتروني",
     phone: "+966 54 374 9292",
@@ -109,7 +112,7 @@ const content = {
     contactTitle: <>Have a product in mind?<br />Let us draw its route.</>,
     contactDescription: "Share the first details and we will come back with a clear next step — without unnecessary complexity or commitment.",
     contactNote: "An initial consultation for your import route",
-    form: { name: "Name", namePlaceholder: "What should we call you?", phone: "Contact number", phonePlaceholder: "+966 5X XXX XXXX", request: "What are you looking for?", requestPlaceholder: "Product, estimated quantity, or shipping route...", submit: "Send details", privacy: "We use your details only to respond to your request." },
+    form: { name: "Name", namePlaceholder: "What should we call you?", phone: "Contact number", phonePlaceholder: "+966 5X XXX XXXX", request: "What are you looking for?", requestPlaceholder: "Product, estimated quantity, or shipping route...", submit: "Send details", sending: "Preparing WhatsApp...", sent: "Your message is ready. WhatsApp will open now", privacy: "We use your details only to respond to your request." },
     footerTag: "We arrange the route. You build the business.",
     email: "Email us",
     phone: "+966 54 374 9292",
@@ -170,6 +173,7 @@ export default function Home() {
     return (localStorage.getItem("silver-pioneer-language") as Language) || "ar";
   });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const t = content[language];
   useScrollMotion();
 
@@ -183,17 +187,26 @@ export default function Home() {
   const toggleLanguage = () => { setLanguage((current) => current === "ar" ? "en" : "ar"); setMenuOpen(false); };
   const submitQuote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const name = String(formData.get("name") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
     const request = String(formData.get("request") || "").trim();
-    const message = language === "ar"
-      ? `مرحبًا فريق الرائدة الفضية، أرغب في الاستفسار عن خدماتكم.\nالاسم: ${name}\nرقم التواصل: ${phone}\nتفاصيل الطلب: ${request}`
-      : `Hello Silver Pioneer team, I would like to enquire about your services.\nName: ${name}\nContact number: ${phone}\nRequest details: ${request}`;
-    const whatsappUrl = `https://wa.me/966543749292?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-    toast.success(t.success, { description: t.successDescription });
-    event.currentTarget.reset();
+    const whatsappUrl = buildWhatsAppUrl(language, { name, phone, request });
+    const whatsappWindow = window.open("about:blank", "_blank");
+    if (whatsappWindow) whatsappWindow.opener = null;
+    toast.success(t.form.sent, { description: t.successDescription });
+    window.setTimeout(() => {
+      if (whatsappWindow && !whatsappWindow.closed) {
+        whatsappWindow.location.href = whatsappUrl;
+      } else {
+        window.location.href = whatsappUrl;
+      }
+      form.reset();
+      setIsSubmitting(false);
+    }, 650);
   };
   const closeMenu = () => setMenuOpen(false);
   const arrow = language === "ar" ? <ArrowUpLeft size={17} /> : <ArrowUpLeft size={17} />;
@@ -213,7 +226,7 @@ export default function Home() {
 
         <section className="paper-grid relative py-20 sm:py-28"><div className="container"><div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20"><div className="relative overflow-hidden border border-[var(--line)] bg-[var(--mist-blue)] p-3 sm:p-5"><div className="image-wash relative aspect-[4/3] overflow-hidden"><img src={asset.shipping} alt={language === "ar" ? "سفينة شحن وطائرة شحن ضمن مسار لوجستي" : "Cargo ship and freight plane on a logistics route"} className="atlas-image h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[var(--ink-navy)]/55 to-transparent" /><div className="absolute bottom-5 right-5 left-5 flex items-end justify-between text-white"><span className="font-display text-lg font-bold">{t.flexible}</span><span className="font-mono text-[0.6rem] tracking-[0.15em] text-white/70">SEA + AIR</span></div></div><div className="pointer-events-none absolute right-0 top-0 h-16 w-16 border-r border-t border-[var(--copper-signal)]" /><div className="pointer-events-none absolute bottom-0 left-0 h-16 w-16 border-b border-l border-[var(--copper-signal)]" /></div><div><p className="section-kicker">{t.whyKicker}</p><h2 className="font-display mt-4 text-3xl font-bold leading-[1.45] tracking-[-0.06em] text-[var(--ink-navy)] sm:text-4xl">{t.whyTitle}</h2><p className="mt-5 max-w-lg text-base leading-8 text-[var(--muted-foreground)]">{t.whyDescription}</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{t.whyBullets.map((item) => <div key={item} className="flex items-center gap-3 border-t border-[var(--line)] pt-4 text-sm font-medium text-[var(--ink-navy)]"><span className="motion-right flex h-6 w-6 shrink-0 items-center justify-center bg-[var(--ink-navy)] text-[var(--copper-signal)]" data-depth="10"><Check size={13} strokeWidth={2.5} /></span>{item}</div>)}</div></div></div></div></section>
 
-        <section id="contact" className="relative overflow-hidden bg-[var(--ink-navy)] py-20 sm:py-28"><div className="absolute -bottom-40 -left-20 h-[420px] w-[420px] rounded-full border border-white/10" /><div className="absolute -bottom-16 left-28 h-[260px] w-[260px] rounded-full border border-white/10" /><div className="container relative"><div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-24"><div className="text-white"><p className="section-kicker">{t.contactKicker}</p><h2 className="font-display mt-5 text-3xl font-bold leading-[1.5] tracking-[-0.07em] sm:text-5xl">{t.contactTitle}</h2><p className="mt-5 max-w-md text-base leading-8 text-white/70">{t.contactDescription}</p><div className="mt-9 flex items-center gap-3 border-t border-white/15 pt-5 text-sm text-white/70"><Sparkles size={17} className="motion-right text-[var(--copper-signal)]" data-depth="14" /> {t.contactNote}</div></div><form onSubmit={submitQuote} className="bg-[var(--paper-ivory)] p-6 shadow-[12px_12px_0_rgba(216,117,75,0.22)] sm:p-8"><div className="grid gap-5 sm:grid-cols-2"><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.name}</span><input required name="name" type="text" placeholder={t.form.namePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.phone}</span><input required name="phone" type="tel" placeholder={t.form.phonePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-left text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" dir="ltr" /></label><label className="block sm:col-span-2"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.request}</span><textarea required name="request" rows={3} placeholder={t.form.requestPlaceholder} className="w-full resize-none border-b border-[var(--line)] bg-transparent px-0 py-2 text-sm leading-7 text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label></div><button type="submit" className="signal-button mt-7 inline-flex w-full items-center justify-center gap-3 bg-[var(--ink-navy)] px-6 py-4 text-sm font-bold text-white hover:bg-[#183a59]">{t.form.submit} <ArrowUpLeft size={17} /></button><p className="mt-4 text-center text-[0.68rem] leading-6 text-[var(--muted-foreground)]">{t.form.privacy}</p></form></div></div></section>
+        <section id="contact" className="relative overflow-hidden bg-[var(--ink-navy)] py-20 sm:py-28"><div className="absolute -bottom-40 -left-20 h-[420px] w-[420px] rounded-full border border-white/10" /><div className="absolute -bottom-16 left-28 h-[260px] w-[260px] rounded-full border border-white/10" /><div className="container relative"><div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-24"><div className="text-white"><p className="section-kicker">{t.contactKicker}</p><h2 className="font-display mt-5 text-3xl font-bold leading-[1.5] tracking-[-0.07em] sm:text-5xl">{t.contactTitle}</h2><p className="mt-5 max-w-md text-base leading-8 text-white/70">{t.contactDescription}</p><div className="mt-9 flex items-center gap-3 border-t border-white/15 pt-5 text-sm text-white/70"><Sparkles size={17} className="motion-right text-[var(--copper-signal)]" data-depth="14" /> {t.contactNote}</div></div><form onSubmit={submitQuote} className="bg-[var(--paper-ivory)] p-6 shadow-[12px_12px_0_rgba(216,117,75,0.22)] sm:p-8"><div className="grid gap-5 sm:grid-cols-2"><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.name}</span><input required name="name" type="text" placeholder={t.form.namePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label><label className="block"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.phone}</span><input required name="phone" type="tel" placeholder={t.form.phonePlaceholder} className="h-12 w-full border-b border-[var(--line)] bg-transparent px-0 text-left text-sm text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" dir="ltr" /></label><label className="block sm:col-span-2"><span className="mb-2 block text-xs font-semibold text-[var(--ink-navy)]">{t.form.request}</span><textarea required name="request" rows={3} placeholder={t.form.requestPlaceholder} className="w-full resize-none border-b border-[var(--line)] bg-transparent px-0 py-2 text-sm leading-7 text-[var(--ink-navy)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--copper-signal)]" /></label></div><button type="submit" disabled={isSubmitting} className={`signal-button mt-7 inline-flex w-full items-center justify-center gap-3 bg-[var(--ink-navy)] px-6 py-4 text-sm font-bold text-white hover:bg-[#183a59] disabled:cursor-wait disabled:opacity-90 ${isSubmitting ? "whatsapp-pending" : ""}`}>{isSubmitting ? <><Loader2 size={17} className="animate-spin" /> {t.form.sending}</> : <>{t.form.submit} <ArrowUpLeft size={17} /></>}</button>{isSubmitting && <p className="mt-3 flex items-center justify-center gap-2 text-center text-[0.72rem] font-semibold text-[var(--copper-signal)]" role="status" aria-live="polite"><CheckCircle2 size={15} /> {t.form.sent}</p>}<p className="mt-4 text-center text-[0.68rem] leading-6 text-[var(--muted-foreground)]">{t.form.privacy}</p></form></div></div></section>
       </main>
 
       <footer className="bg-[var(--ink-navy)] py-12 text-[var(--paper-ivory)]"><div className="container"><div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-10 lg:flex-row lg:items-end"><div><Logo language={language} light /><p className="mt-5 max-w-xs text-sm leading-7 text-white/55">{t.footerTag}</p></div><div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-white/65 sm:grid-cols-3 sm:gap-x-16"><a className="transition-colors hover:text-[var(--copper-signal)]" href="#services">{t.nav.services}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#route">{t.nav.route}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="#contact">{t.quote}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="mailto:hello@silverpioneer.co">{t.email}</a><a className="transition-colors hover:text-[var(--copper-signal)]" href="tel:+966543749292" dir="ltr">{t.phone}</a></div></div><div className="flex flex-col justify-between gap-3 pt-6 text-[0.62rem] text-white/40 sm:flex-row sm:items-center"><span>{t.footerCopy}</span><span className="font-mono tracking-[0.12em]">SILVER PIONEER LOGISTICS / CN → GCC</span></div></div></footer>
